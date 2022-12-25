@@ -11,21 +11,57 @@ import pandas as pd
 
 
 def generate_2d_gaussian(n:int, R:np.ndarray, S:np.ndarray, x_c:np.ndarray) -> np.ndarray:
+	"""Generate a gaussian distribution in 2 dimension, stretch it, rotate it and decenter it
+
+	Args:
+		n (int): number of samples
+		R (np.ndarray): Rotation matrix. Shape = (2, 2)
+		S (np.ndarray): Standard devs. Shape = (2,)
+		x_c (np.ndarray): New center. Shape = (2,)
+
+	Returns:
+		np.ndarray: gaussian data. Shape = (n, m)
+	"""
 	X_g = np.random.randn(n, 2)
 	return X_g @ np.diag(S) @ R + x_c
 
 def subtract_average(X:np.ndarray) -> np.ndarray:
+	"""Subtracts the per-feature averages from the data
+
+	Args:
+		X (np.ndarray): Data. Shape = (n, m)
+
+	Returns:
+		np.ndarray: subtracted-average data. Shape = (m, n)
+	"""
 	n, _ = X.shape
 	# compute the averages for each of the features
 	x_avg = np.mean(X, axis=0)
 	return X - np.outer(np.ones(n), x_avg)
 
 def compute_pca(X:np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+	"""Compute the PCA, using SVD.
+
+	Args:
+		X (np.ndarray): data. Shape = (n, m)
+
+	Returns:
+		Tuple[np.ndarray, np.ndarray, np.ndarray]: U, S, V^T
+	"""
 	n, _ = X.shape
 	B = subtract_average(X)
 	return np.linalg.svd(B.T / np.sqrt(n))
 
 def compute_confidence_interval(U:np.ndarray, S:np.ndarray) -> np.ndarray:
+	"""Returns the confidence interval of the data as an ellipsoid, centered around (0, 0).
+
+	Args:
+		U (np.ndarray): principal components matrix. Shape = (2, 2)
+		S (np.ndarray): principal values. Shape = (2, 2)
+
+	Returns:
+		np.ndarray: confidence interval array. Shape = (100, 2)
+	"""
 	thetas = np.arange(0., 1., .01) * 2 * np.pi
 	return np.array([np.cos(thetas), np.sin(thetas)]).T @ np.diag(S) @ U.T
 
