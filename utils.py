@@ -1,5 +1,6 @@
 from typing import Tuple
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -29,6 +30,14 @@ def compute_pca(X:np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 	n, _ = X.shape
 	B = subtract_average(X)
 	return np.linalg.svd(B.T / np.sqrt(n))
+
+def plot_singular_values(s:np.ndarray) -> None:
+	_, axs = plt.subplots(1, 2)
+	axs[0].semilogy(s, 'b-')
+	axs[0].set(xlabel='id', ylabel='singular value', title='Singular values')
+	axs[1].plot(np.cumsum(s), 'b-')
+	axs[1].set(xlabel='id', ylabel='cumsum', title="Cumulative sum of singular values")
+	plt.show()
 
 
 if __name__ == '__main__':
